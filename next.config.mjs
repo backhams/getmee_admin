@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    env: {
+      API_ENDPOINT: 'https://getmeeapiendpointsservice-production.up.railway.app',
+    },
+  };
+  
+  export default nextConfig;
+  

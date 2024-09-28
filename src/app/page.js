@@ -4,7 +4,7 @@ import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaFileAlt, FaUser
 
 const JobPostingForm = () => {
   const [loading,setLoading] = useState(false);
-  const api ="http://localhost:5000"
+  const api = process.env.API_ENDPOINT
   const [formData, setFormData] = useState({
     title: "",
     poster: "",
