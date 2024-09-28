@@ -160,12 +160,11 @@ const JobPostingForm = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="modeOfMessage">
-              <FaComments className="inline mr-2" />Mode of Message *
+              <FaComments className="inline mr-2" />Mode of Message 
             </label>
             <select
               id="modeOfMessage"
               name="modeOfMessage"
-              required
               value={formData.modeOfMessage}
               onChange={handleInputChange}
               disabled={loading}
@@ -233,6 +232,7 @@ const JobPostingForm = () => {
             >
               <option value="">Select a category</option>
               <option value="painter">Painter</option>
+              <option value="peon">Peon</option>
               <option value="gardener">Gardener</option>
               <option value="web developer">Web Developer</option>
               <option value="graphic designer">Graphic Designer</option>
