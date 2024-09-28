@@ -41,7 +41,6 @@ const JobPostingForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log(formData)
       setLoading(true)
       const response = await fetch(`${api}/postJob`,{
       method:'POST',
@@ -53,6 +52,7 @@ const JobPostingForm = () => {
       const data = await response.json();
       if(response.ok){
         alert(data.message)
+        setLoading(false)
          // Reset form fields here
       setFormData({
         title: "",
