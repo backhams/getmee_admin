@@ -65,6 +65,7 @@ const JobPostingForm = () => {
           locality: "",
           category: "",
           payRate: "",
+          payRateInWord: "",
           payType: "",
           image: "",
           type: "",
@@ -905,7 +906,7 @@ const JobPostingForm = () => {
               type="tel"
               id="posterNumber"
               name="posterNumber"
-              required={formData.jobApplyingMode === "whatsapp" || formData.modeOfMessage === "whatsapp"}
+              required={formData.jobApplyingMode === "whatsapp" || formData.modeOfMessage === "whatsapp" || formData.modeOfMessage === "call"}
               placeholder="Include country code also"
               value={formData.posterNumber}
               disabled={loading}
@@ -943,6 +944,7 @@ const JobPostingForm = () => {
               <option value="">Select a mode</option>
               <option value="email">Email</option>
               <option value="whatsapp">Whatsapp</option>
+              <option value="call">Call</option>
             </select>
           </div>
           <div>
@@ -1010,15 +1012,32 @@ const JobPostingForm = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="payRate">
-              <FaMoneyBillWave className="inline mr-2" />Pay Rate *
+              <FaMoneyBillWave className="inline mr-2" />Pay Rate (Optional)
             </label>
             <input
               type="number"
               id="payRate"
               name="payRate"
-              required
+              required={!formData.payRateInWord ? true : false}
               value={formData.payRate}
               onChange={handleInputChange}
+              disabled={loading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="payRate">
+              <FaMoneyBillWave className="inline mr-2" />Pay Rate Alternative (Optional)
+            </label>
+            <input
+              id="payRateInWord"
+              name="payRateInWord"
+              // required={!formData.payRateInWord ? true : false}
+              maxLength={10}
+              value={formData.payRateInWord}
+              onChange={handleInputChange}
+              placeholder="Level 7 Pay"
               disabled={loading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
