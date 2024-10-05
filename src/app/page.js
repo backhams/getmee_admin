@@ -1092,6 +1092,7 @@ const JobPostingForm = () => {
             >
               <option value="">Select job type</option>
               <option value="full-time">Full-time</option>
+              <option value="full/part-time">Full/Part-time</option>
               <option value="part-time">Part-time</option>
               <option value="freelance">Freelance</option>
               <option value="contract">Contract</option>
