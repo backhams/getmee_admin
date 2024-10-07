@@ -110,28 +110,6 @@ const Job = ({ params, job }) => {
         </div>
       </div>
 
-      {/* Popup Section */}
-      {isPopupOpen && (
-        <div className="absolute top-16 right-4 bg-white shadow-lg rounded-md p-4 z-10">
-          <WhatsappShareButton url={shareUrl} className="flex items-center mb-2">
-            <span className="mr-2">WhatsApp</span>
-            <FiMessageSquare />
-          </WhatsappShareButton>
-          <TelegramShareButton url={shareUrl} className="flex items-center mb-2">
-            <span className="mr-2">Telegram</span>
-            <FiMessageSquare />
-          </TelegramShareButton>
-          <TwitterShareButton url={shareUrl} className="flex items-center mb-2">
-            <span className="mr-2">Twitter</span>
-            <FiMessageSquare />
-          </TwitterShareButton>
-          <button onClick={copyToClipboard} className="flex items-center">
-            <span className="mr-2">Copy Link</span>
-            <FiCopy />
-          </button>
-        </div>
-      )}
-
       {/* Job Title Section */}
       <div className="px-4 py-6 bg-white">
         <h1 className="text-2xl font-bold mb-2">{job.title}</h1>

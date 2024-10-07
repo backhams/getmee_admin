@@ -1,5 +1,5 @@
 "use client"
-import React, { useState,useEffect } from "react";
+import React, { useState } from "react";
 import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaFileAlt, FaUser, FaPhone, FaEnvelope, FaComments, FaLocationArrow, FaList, FaImage, FaBriefcase, FaGraduationCap, FaUserTie, FaUsers, FaHandshake, FaUserPlus, FaCalendarAlt } from "react-icons/fa";
 import { AiFillEyeInvisible } from "react-icons/ai";
 import Select from 'react-select';
@@ -10,11 +10,6 @@ const EditJob = () => {
     const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { job } = useJobStore();
-  useEffect(() => {
-    if (!job) {
-      // Handle case where no job is present (e.g., redirect to a different page)
-    }
-  }, [job]);
 
   if (!job) {
     return <p>No job to edit</p>;
