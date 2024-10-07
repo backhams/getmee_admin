@@ -1,105 +1,92 @@
 "use client"
-import React, { useState } from "react";
-import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaFileAlt, FaUser, FaPhone, FaEnvelope, FaComments, FaLocationArrow, FaList, FaImage, FaBriefcase, FaGraduationCap, FaUserTie, FaUsers, FaHandshake, FaUserPlus, FaCalendarAlt } from "react-icons/fa";
+import React, { useState, useEffect, CSSProperties } from 'react';
 import Select from 'react-select';
+import { FaBell, FaPlus, FaWhatsapp, FaStar, FaMapMarkerAlt, FaHome, FaCalendar, FaBookmark, FaChartLine, FaUser } from 'react-icons/fa';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import PropagateLoader from "react-spinners/PropagateLoader";
+import ClimbingBoxLoader from "react-spinners/ClimbingBoxLoader";
+import { BsEmojiSmileFill } from "react-icons/bs";
+import { IoSettingsSharp } from "react-icons/io5";
+import paginateJobList from '@/app/components/Action';
+import { useInView } from "react-intersection-observer";
+import { Bars, ThreeDots } from "react-loader-spinner";
 
-const JobPostingForm = () => {
-  const [loading, setLoading] = useState(false);
-  const api = process.env.API_ENDPOINT
-  const [formData, setFormData] = useState({
-    title: "",
-    poster: "",
-    posterNumber: "",
-    posterEmail: "",
-    modeOfMessage: "",
-    location: "",
-    locality: "",
-    category: "",
-    payRate: "",
-    payType: "",
-    image: "",
-    type: "",
-    description: "",
-    experience: "",
-    qualification: "",
-    shortDescription: "",
-    appliersCount: 0,
-    negotiation: false,
-    jobApplyingMode: "",
-    formSubmissionPath: "",
-    offerBy: "",
-    posterDuration: 1
-  });
+const JobSearchApp = ({ data, joblist }) => {
+  const router = useRouter();
+  const url = usePathname();
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: type === "checkbox" ? checked : value
-    }));
-  };
+  // Extract parameters from data with fallback values
+  const { location: initialLocation = null, category: initialCategory = null } = data || {};
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedLocation, setSelectedLocation] = useState(initialLocation);
+  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [joblistDataTracker, setJoblistDataTracker] = useState(joblist);
+  const [jobLists, setJoblists] = useState(joblist);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [paginateError, setPaginateError] = useState("");
+  const [ref, inView] = useInView();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true)
-      const response = await fetch(`${api}/postJob`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ formData })
-      })
-      const data = await response.json();
-      if (response.ok) {
-        alert(data.message)
-        setLoading(false)
-        // Reset form fields here
-        setFormData({
-          title: "",
-          poster: "",
-          posterNumber: "",
-          posterEmail: "",
-          modeOfMessage: "",
-          location: "",
-          locality: "",
-          category: "",
-          payRate: "",
-          payRateInWord: "",
-          payType: "",
-          image: "",
-          type: "",
-          description: "",
-          experience: "",
-          qualification: "",
-          shortDescription: "",
-          appliersCount: 0,
-          negotiation: false,
-          jobApplyingMode: "",
-          formSubmissionPath: "",
-          offerBy: "",
-          posterDuration: 1
-        });
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!data) {
+        await router.push('/joblists/All/All');
+        setLoading(false);
       } else {
-        setLoading(false)
-        alert(data.message)
+        setLoading(false);
       }
-    } catch (error) {
-      setLoading(false)
-      alert(error.message)
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (inView && !loadingMore) {
+      loadMoreProduct();
     }
-    console.log("Form submitted:", formData);
-    // Here you would typically send the data to your backend
-  };
-  const openSettings = async () =>{
-    try {
-      
-    } catch (error) {
-      alert(error.message)
-    }
+  }, [inView]);
+
+  let debounceTimeout = null;
+
+  async function loadMoreProduct() {
+    if (loadingMore) return; // Return if already loading more products
+    setLoadingMore(true); // Set loadingMore to true when starting to load more
+
+    // Debounce to prevent rapid multiple calls
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(async () => {
+      const next = page + 1;
+      try {
+        const paginateJob = await paginateJobList(selectedCategory, selectedLocation, next);
+        console.log(paginateJob);
+
+        if (typeof paginateJob === "string") {
+          setPaginateError(paginateJob); // Display the error message if needed
+        } else if (paginateJob && paginateJob.length) {
+          setPage(next);
+          setJoblists((prev) => [...(prev || []), ...paginateJob]); // Append new jobs
+        }
+      } catch (error) {
+        setPaginateError("An error occurred while loading more products.");
+      } finally {
+        setLoadingMore(false);
+        setIsLoading(false);
+      }
+    }, 200); // Delay by 200ms to debounce
   }
-  const options = [
+
+
+
+  const override = {
+    display: "block",
+    margin: "0 auto",
+    borderColor: "red",
+  };
+
+  // Add job categories as options for the dropdown
+  const jobCategories = [
     { value: 'painter', label: 'Painter' },
     { value: 'peon', label: 'Peon' },
     { value: 'gardener', label: 'Gardener' },
@@ -960,423 +947,257 @@ const JobPostingForm = () => {
     { value: 'freelance compliance specialist', label: 'Freelance Compliance Specialist' },
     { value: 'freelance risk management consultant', label: 'Freelance Risk Management Consultant' }
   ];
+  const locations = [
+    { value: 'Aizawl Mizoram', label: 'Aizawl, Mizoram' },
+    { value: 'Lunglei Mizoram', label: 'Lunglei, Mizoram' },
+    { value: 'Champhai Mizoram', label: 'Champhai, Mizoram' },
+    { value: 'Serchhip Mizoram', label: 'Serchhip, Mizoram' },
+    { value: 'Kolasib Mizoram', label: 'Kolasib, Mizoram' },
+    { value: 'Mamit Mizoram', label: 'Mamit, Mizoram' },
+    { value: 'Saiha Mizoram', label: 'Saiha, Mizoram' },
+    { value: 'Lawngtlai Mizoram', label: 'Lawngtlai, Mizoram' },
+    { value: 'Saitual Mizoram', label: 'Saitual, Mizoram' },
+    { value: 'Khawzawl Mizoram', label: 'Khawzawl, Mizoram' },
+    { value: 'Hnahthial Mizoram', label: 'Hnahthial, Mizoram' }
+  ];
 
+  const handleCategoryChange = (selectedOption) => {
+    const newCategory = selectedOption ? selectedOption.value : 'all';
+    setSelectedCategory(newCategory);
+  };
+
+  const handleLocationChange = (selectedOption) => {
+    const newLocation = selectedOption ? selectedOption.value : 'all';
+    setSelectedLocation(newLocation);
+  };
+
+  const searchJob = async () => {
+    try {
+      updateUrl(selectedCategory, selectedLocation);
+
+    } catch (error) {
+      alert(error.message)
+    }
+  }
+
+  function checkJobExpiration(job) {
+    const expirationDate = new Date(job.expirationDate);
+    return new Date() > expirationDate;
+  }
+
+
+  const updateUrl = (category, location) => {
+    const decodedUrl = decodeURIComponent(url);
+    const updatedCategory = category || 'all';
+    const updatedLocation = location || 'all';
+    console.log("newUrl", `/joblists/${decodeURIComponent(updatedCategory)}/${decodeURIComponent(updatedLocation)}`)
+
+    // Update the URL to the format: /joblists/category/location
+    router.push(`/joblists/${decodeURIComponent(updatedCategory)}/${decodeURIComponent(updatedLocation)}`);
+    if (decodedUrl !== `/joblists/${decodeURIComponent(updatedCategory)}/${decodeURIComponent(updatedLocation)}`) {
+      setJoblistDataTracker()
+    }
+  };
+
+  // Set initial values
+  const defaultCategory = decodeURIComponent(initialCategory) || null;
+  const defaultLocation = decodeURIComponent(initialLocation) || null;
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <div className="text-center">
+          <ClimbingBoxLoader
+            color="black"
+            loading={loading}
+            cssOverride={override}
+            size={20}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+        </div>
+      </div>
+    )
+  }
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-xl">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Post a New Job</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="flex flex-col h-screen bg-gray-100">
+      {!joblistDataTracker && (
+        <div className='h-screen w-screen flex items-center justify-center z-10 absolute bg-[rgba(0,0,0,0.1)]'>
+          <PropagateLoader
+            color="black"
+            loading={joblistDataTracker}
+            cssOverride={override}
+            size={20}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+        </div>
+      )}
+      {/* Company Branding Section */}
+      <div className="bg-white p-4 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <img
+            src="/getmeelogo.png"
+            alt="Getmee Logo"
+            className="w-12 h-12 rounded-full"
+          />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="title">
-              <FaFileAlt className="inline mr-2" />Job Title *
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              required
-              disabled={loading}
-              value={formData.title}
-              placeholder="Senior Software developer"
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="poster">
-              <FaUser className="inline mr-2" />Poster *
-            </label>
-            <input
-              type="text"
-              id="poster"
-              name="poster"
-              required
-              disabled={loading}
-              value={formData.poster}
-              placeholder="person , company or government department name"
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="posterNumber">
-              <FaPhone className="inline mr-2" />Poster Number
-            </label>
-            <input
-              type="tel"
-              id="posterNumber"
-              name="posterNumber"
-              required={formData.jobApplyingMode === "whatsapp" || formData.modeOfMessage === "whatsapp" || formData.modeOfMessage === "call"}
-              placeholder="Include country code also"
-              value={formData.posterNumber}
-              disabled={loading}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="posterEmail">
-              <FaEnvelope className="inline mr-2" />Poster Email
-            </label>
-            <input
-              type="email"
-              id="posterEmail"
-              name="posterEmail"
-              disabled={loading}
-              required={formData.modeOfMessage === "email" ? true : false}
-              value={formData.posterEmail}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="modeOfMessage">
-              <FaComments className="inline mr-2" />Mode of Message
-            </label>
-            <select
-              id="modeOfMessage"
-              name="modeOfMessage"
-              value={formData.modeOfMessage}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select a mode</option>
-              <option value="email">Email</option>
-              <option value="whatsapp">Whatsapp</option>
-              <option value="call">Call</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="location">
-              <FaMapMarkerAlt className="inline mr-2" />Location *
-            </label>
-            <select
-              id="location"
-              name="location"
-              required
-              value={formData.location}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Location</option>
-              <option value="aizawl mizoram">Aizawl, Mizoram</option>
-              <option value="lunglei mizoram">Lunglei, Mizoram</option>
-              <option value="champhai mizoram">Champhai, Mizoram</option>
-              <option value="serchhip mizoram">Serchhip, Mizoram</option>
-              <option value="kolasib mizoram">Kolasib, Mizoram</option>
-              <option value="mamit mizoram">Mamit, Mizoram</option>
-              <option value="saiha mizoram">Saiha, Mizoram</option>
-              <option value="lawngtlai mizoram">Lawngtlai, Mizoram</option>
-              <option value="saitual mizoram">Saitual, Mizoram</option>
-              <option value="khawzawl mizoram">Khawzawl, Mizoram</option>
-              <option value="hnahthial mizoram">Hnahthial, Mizoram</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="locality">
-              <FaLocationArrow className="inline mr-2" />Locality (Optional)
-            </label>
-            <input
-              type="text"
-              id="locality"
-              name="locality"
-              placeholder="aizawl,mizoram mission veng etc"
-              value={formData.locality}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="category">
-              <FaList className="inline mr-2" />Category *
-            </label>
-            <Select
-              id="category"
-              name="category"
-              isDisabled={loading}
-              required
-              options={options}
-              value={options.find(option => option.value === formData.category)}
-              onChange={(selectedOption) => setFormData(prevState => ({
-                ...prevState,
-                category: selectedOption ? selectedOption.value : ''
-              }))}
-              placeholder="Select a category"
-              className="w-full"
-            />
-
-
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="payRate">
-              <FaMoneyBillWave className="inline mr-2" />Pay Rate (Optional)
-            </label>
-            <input
-              type="number"
-              id="payRate"
-              name="payRate"
-              required={!formData.payRateInWord ? true : false}
-              value={formData.payRate}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="payRate">
-              <FaMoneyBillWave className="inline mr-2" />Pay Rate Alternative (Optional)
-            </label>
-            <input
-              id="payRateInWord"
-              name="payRateInWord"
-              // required={!formData.payRateInWord ? true : false}
-              maxLength={10}
-              value={formData.payRateInWord}
-              onChange={handleInputChange}
-              placeholder="Level 7 Pay"
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="payType">
-              <FaClock className="inline mr-2" />Pay Type *
-            </label>
-            <select
-              id="payType"
-              name="payType"
-              required
-              value={formData.payType}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select pay type</option>
-              <option value="hourly">Hourly</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="fixed">Fixed</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="image">
-              <FaImage className="inline mr-2" />Image URL *
-            </label>
-            <input
-              type="url"
-              id="image"
-              name="image"
-              required
-              value={formData.image}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="type">
-              <FaBriefcase className="inline mr-2" />Job Type *
-            </label>
-            <select
-              id="type"
-              name="type"
-              required
-              value={formData.type}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select job type</option>
-              <option value="full-time">Full-time</option>
-              <option value="full/part-time">Full/Part-time</option>
-              <option value="part-time">Part-time</option>
-              <option value="freelance">Freelance</option>
-              <option value="contract">Contract</option>
-            </select>
+            <h2 className="font-bold text-lg">GetMee</h2>
+            <a className="text-sm text-gray-600" href='https://www.getmee.in'>www.getmee.in</a>
           </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="description">
-            <FaFileAlt className="inline mr-2" />Job Description *
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            required
-            value={formData.description}
-            onChange={handleInputChange}
-            disabled={loading}
-            rows="4"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="experience">
-              <FaUserTie className="inline mr-2" />Experience (Optional)
-            </label>
-            <input
-              type="text"
-              id="experience"
-              name="experience"
-              value={formData.experience}
-              placeholder="1-3 years etc"
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="qualification">
-              <FaGraduationCap className="inline mr-2" />Qualification (Optional)
-            </label>
-            <input
-              type="text"
-              id="qualification"
-              name="qualification"
-              value={formData.qualification}
-              placeholder="B.Tech Graduate etc"
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="shortDescription">
-            <FaFileAlt className="inline mr-2" />Short Description *
-          </label>
-          <textarea
-            id="shortDescription"
-            name="shortDescription"
-            required
-            value={formData.shortDescription}
-            onChange={handleInputChange}
-            disabled={loading}
-            rows="2"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="negotiation"
-              name="negotiation"
-              checked={formData.negotiation}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="negotiation" className="ml-2 block text-sm text-gray-900">
-              <FaHandshake className="inline mr-2" />Negotiation
-            </label>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="jobApplyingMode">
-              <FaUserPlus className="inline mr-2" />Job Applying Mode *
-            </label>
-            <select
-              id="jobApplyingMode"
-              name="jobApplyingMode"
-              required
-              value={formData.jobApplyingMode}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select job applying Mode</option>
-              <option value="whatsapp">Whatsapp</option>
-              <option value="website">Website</option>
-              <option value="instagram">Instagram</option>
-              <option value="withoutForm">Without Form</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="formSubmissionPath">
-              <FaFileAlt className="inline mr-2" />Form Submission Path (if only Website or Instagram)
-            </label>
-            <input
-              type="text"
-              id="formSubmissionPath"
-              name="formSubmissionPath"
-              required={formData.jobApplyingMode !== "whatsapp" && formData.jobApplyingMode !== "withoutForm" ? true : false}
-              placeholder="https://www.example.com/job_apply_form"
-              value={formData.formSubmissionPath}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="offerBy">
-              <FaBuilding className="inline mr-2" />Offered By *
-            </label>
-            <select
-              id="offerBy"
-              name="offerBy"
-              required
-              value={formData.offerBy}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Who Offering Job</option>
-              <option value="government">Government</option>
-              <option value="individual">Individual</option>
-              <option value="enterprise">Enterprise</option>
-              <option value="organization">Organization</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="posterDuration">
-              <FaCalendarAlt className="inline mr-2" />Poster Duration (days) *
-            </label>
-            <input
-              type="number"
-              id="posterDuration"
-              name="posterDuration"
-              required
-              value={formData.posterDuration}
-              onChange={handleInputChange}
-              disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <div className="flex">
-          <Link href="/joblists/All/All"
-            className="px-6 py-2 bg-black text-white font-semibold rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
-          >
-            Settings
-          </Link>
-          <button
-            disabled={loading ? true : false}
-            type="submit"
-            className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ml-10"
-          >
-            {`${loading ? "Posting Job ..." : "Post Job"}`}
+        <Link href="/">
+          <button className="flex flex-col items-center text-gray-900">
+            <FaPlus className="text-xl" />
+            <span className="text-xs">Post</span>
           </button>
-        </div>
+        </Link>
+        {/* <FaBell className="text-gray-600" /> */}
+      </div>
 
-      </form>
+      {/* Search Bar */}
+      <div className="bg-white p-4 space-y-3">
+        {/* Job Category Dropdown */}
+        <div className="relative">
+          <Select
+            className="w-full"
+            options={jobCategories}
+            placeholder="Choose job category"
+            // Set default value only if it's not "all" (case-insensitive)
+            defaultValue={defaultCategory && defaultCategory.toLowerCase() !== "all"
+              ? { value: defaultCategory, label: defaultCategory }
+              : null}
+            isSearchable
+            onChange={(selectedOption) => handleCategoryChange(selectedOption)}
+          />
+        </div>
+        <div className="relative">
+          <FaMapMarkerAlt className="absolute left-3 top-3 text-gray-400" />
+          <Select
+            className="w-full pl-10"
+            options={locations}
+            placeholder="Select location"
+            // Set default value only if it's not "all" (case-insensitive)
+            defaultValue={defaultLocation && defaultLocation.toLowerCase() !== "all"
+              ? { value: defaultLocation, label: defaultLocation }
+              : null}
+            isSearchable
+            onChange={(selectedOption) => handleLocationChange(selectedOption)}
+          />
+        </div>
+        <button onClick={() => searchJob()} className="w-full bg-black text-white py-2 rounded-md font-bold">
+          Search Job
+        </button>
+      </div>
+
+      {/* Search Results */}
+      <div className="flex-1 overflow-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold">Search Results</h3>
+          <button className="text-blue-500">See all</button>
+        </div>
+        {Array.isArray(jobLists) && jobLists.length === 0 ? (
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <BsEmojiSmileFill className="text-6xl text-green-700 w-screen mb-7" />
+              {/* <h1>{job}</h1> */}
+              <h1>No jobs found at the moment</h1>
+            </div>
+          </div>
+          // <div>
+          // </div>
+        ) : typeof jobLists === 'string' ? (
+          <h1>{jobLists}</h1>
+        ) : (
+          jobLists && jobLists.map((job) => {
+            const expirationDate = new Date(job.expirationDate);
+            const isExpired = checkJobExpiration(job);
+
+            const formatDate = (dateString) => {
+              const date = new Date(dateString);
+              return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              });
+            };
+            return (
+              <div key={job.id} className="bg-white p-4 rounded-lg shadow-md mb-4 flex items-center">
+                <img
+                  src={job.image}
+                  alt={job.title}
+                  className="w-20 h-20 object-cover rounded-md mr-4"
+                />
+                <div className="flex-1">
+                  <h4 className="font-bold">{job.title}</h4>
+                  <h1 className={isExpired ? "text-red-500" : "text-green-500"}>
+                    {isExpired
+                      ? `Expired on: ${expirationDate.toDateString()}`
+                      : `Expiring on: ${expirationDate.toDateString()}`}
+                  </h1>
+                  <p>{job.visibility ? "Visible" : "This job is hidden"}</p>
+                  <p>Upload Date: {formatDate(job.createdAt)}</p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-bold">By</span> {job.poster}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {job.location.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                  </p>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex space-x-2">
+                      <span className="bg-yellow-200 text-yellow-700 px-2 py-1 rounded-full text-xs">
+                        {job.type}
+                      </span>
+                    </div>
+                    <div className="ml-2">
+                      {job.payRate ? (
+                        <span className="text-green-500 font-bold">₹{job.payRate.toFixed(0)}</span>
+                      ) : (
+                        <span className="text-green-500 font-bold">₹{job.payRateInWord}</span>
+                      )}
+                      <span className="text-xs text-gray-500"> / {job.payType}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="ml-auto">
+                  <Link href={`/job/${job._id}`} className="bg-black text-white px-4 py-2 rounded-md">
+                    Edit
+                  </Link>
+                </div>
+              </div>
+            );
+          })
+        )}
+
+        {!isLoading && jobLists && jobLists.length > 0 && (
+          <div
+            ref={ref}
+            className={`col-span-1 mt-16 flex items-center justify-center sm:col-span-2 md:col-span-3 lg:col-span-4`}
+          >
+            <span>
+              <ThreeDots
+                height="50"
+                width="50"
+                radius="9"
+                color="red"
+                ariaLabel="three-dots-loading"
+                wrapperStyle={{}}
+                wrapperClassName=""
+                visible={true}
+              />
+            </span>
+          </div>
+        )}
+        <div
+          className={`col-span-1 mt-1 flex items-center justify-center sm:col-span-2 md:col-span-3 lg:col-span-4`}
+        >
+          <h1>{paginateError ? paginateError : ""}</h1>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default JobPostingForm;
+export default JobSearchApp;

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     env: {
-      API_ENDPOINT: 'https://getmeeapiendpointsservice-production.up.railway.app',
+      API_ENDPOINT: 'http://getmeeapiendpointsservice-production.up.railway.app',
     },
   };
   

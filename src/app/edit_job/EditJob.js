@@ -1,35 +1,49 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaFileAlt, FaUser, FaPhone, FaEnvelope, FaComments, FaLocationArrow, FaList, FaImage, FaBriefcase, FaGraduationCap, FaUserTie, FaUsers, FaHandshake, FaUserPlus, FaCalendarAlt } from "react-icons/fa";
+import { AiFillEyeInvisible } from "react-icons/ai";
 import Select from 'react-select';
 import Link from 'next/link';
-
-const JobPostingForm = () => {
+import useJobStore from '@/app/store/jobStore';
+import { useRouter } from "next/navigation";
+const EditJob = () => {
+    const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { job } = useJobStore();
+  useEffect(() => {
+    if (!job) {
+      // Handle case where no job is present (e.g., redirect to a different page)
+    }
+  }, [job]);
+
+  if (!job) {
+    return <p>No job to edit</p>;
+  }
   const api = process.env.API_ENDPOINT
   const [formData, setFormData] = useState({
-    title: "",
-    poster: "",
-    posterNumber: "",
-    posterEmail: "",
-    modeOfMessage: "",
-    location: "",
-    locality: "",
-    category: "",
-    payRate: "",
-    payType: "",
-    image: "",
-    type: "",
-    description: "",
-    experience: "",
-    qualification: "",
-    shortDescription: "",
-    appliersCount: 0,
-    negotiation: false,
-    jobApplyingMode: "",
-    formSubmissionPath: "",
-    offerBy: "",
-    posterDuration: 1
+    title: job.title,
+    poster: job.poster,
+    posterNumber: job.posterNumber,
+    posterEmail: job.posterEmail,
+    modeOfMessage: job.modeOfMessage,
+    location: job.location,
+    locality: job.locality,
+    category: job.category,
+    payRate: job.payRate,
+    payType: job.payType,
+    image: job.image,
+    type: job.type,
+    description: job.description,
+    experience: job.experience,
+    qualification: job.qualification,
+    shortDescription: job.shortDescription,
+    appliersCount: job.appliersCount,
+    negotiation: job.negotiation,
+    visibility: job.visibility,
+    jobApplyingMode: job.jobApplyingMode,
+    formSubmissionPath: job.formSubmissionPath,
+    offerBy: job.offerBy,
+    posterDuration: job.posterDuration
   });
 
   const handleInputChange = (e) => {
@@ -44,12 +58,12 @@ const JobPostingForm = () => {
     e.preventDefault();
     try {
       setLoading(true)
-      const response = await fetch(`${api}/postJob`, {
-        method: 'POST',
+      const response = await fetch(`${api}/updateJob`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ formData })
+        body: JSON.stringify({ formData,jobId:job._id })
       })
       const data = await response.json();
       if (response.ok) {
@@ -81,6 +95,13 @@ const JobPostingForm = () => {
           offerBy: "",
           posterDuration: 1
         });
+        // Redirect to the new page
+        router.push("/joblists/All/All");
+        
+        // Reload the new page after a slight delay
+        setTimeout(() => {
+          window.location.reload(); // Reload the new page
+        }, 1000); // Delay for 1sec to ensure the route has changed
       } else {
         setLoading(false)
         alert(data.message)
@@ -89,7 +110,7 @@ const JobPostingForm = () => {
       setLoading(false)
       alert(error.message)
     }
-    console.log("Form submitted:", formData);
+    console.log("Form submitted");
     // Here you would typically send the data to your backend
   };
   const openSettings = async () =>{
@@ -109,97 +130,6 @@ const JobPostingForm = () => {
     { value: 'driver', label: 'Driver' },
     { value: 'chef', label: 'Chef' },
     { value: 'electrician', label: 'Electrician' },
-    { value: 'computer assistant', label: 'Computer Assistant' },
-    { value: 'lower division clerk', label: 'Lower Division Clerk' },
-    { value: 'upper division clerk', label: 'Upper Division Clerk' },
-    { value: 'account manager', label: 'Account Manager' },
-    { value: 'model', label: 'Model' },
-    { value: 'para military', label: 'Para Military' },
-    { value: 'police', label: 'Police' },
-    { value: 'armed forces', label: 'Armed Forces' },
-    { value: 'gym trainer', label: 'Gym Trainer' },
-    { value: 'dermatologist', label: 'Dermatologist' },
-    { value: 'psychiatrist', label: 'Psychiatrist' },
-    { value: 'civil engineer', label: 'Civil Engineer' },
-    { value: 'architecture', label: 'Architecture' },
-    { value: 'magician', label: 'Magician' },
-    { value: 'works manager', label: 'Works Manager' },
-    { value: 'nodal officer', label: 'Nodal Officer' },
-    { value: 'technical assistant', label: 'Technical Assistant' },
-    { value: 'song writer', label: 'Song Writer' },
-    { value: 'beautician', label: 'Beautician' },
-    { value: 'opthalmologist', label: 'Opthalmologist' },
-    { value: 'ent physician', label: 'ENT Physician' },
-    { value: 'orthopedic', label: 'Orthopedic' },
-    { value: 'surgeon', label: 'Surgeon' },
-    { value: 'direct seller', label: 'Direct Seller' },
-    { value: 'network marketer', label: 'Network Marketer' },
-    { value: 'marketing manager', label: 'Marketing Manager' },
-    { value: 'full stack developer', label: 'Full Stack Developer' },
-    { value: 'developer', label: 'Developer' },
-    { value: 'software engineer', label: 'Software Engineer' },
-    { value: 'backend developer', label: 'Backend Developer' },
-    { value: 'frontend developer', label: 'Frontend Developer' },
-    { value: 'devops engineer', label: 'Devops Engineer' },
-    { value: 'dish washer', label: 'Dish Washer' },
-    { value: 'waitress', label: 'Waitress' },
-    { value: 'floor cleaner', label: 'Floor Cleaner' },
-    { value: 'cook helper', label: 'Cook Helper' },
-    { value: 'driver helper', label: 'Driver Helper' },
-    { value: 'health worker', label: 'Health Worker' },
-    { value: 'event manager', label: 'Event Manager' },
-    { value: 'bank manager', label: 'Bank Manager' },
-    { value: 'bank po', label: 'Bank PO' },
-    { value: 'sales executive', label: 'Sales Executive' },
-    { value: 'medical representative', label: 'Medical Representative' },
-    { value: 'charter accountant', label: 'Charter Accountant' },
-    { value: 'lawyer', label: 'Lawyer' },
-    { value: 'advocate', label: 'Advocate' },
-    { value: 'bank clerk', label: 'Bank Clerk' },
-    { value: 'banking associate', label: 'Banking Associate' },
-    { value: 'personal banker', label: 'Personal Banker' },
-    { value: 'loan officer', label: 'Loan Officer' },
-    { value: 'relationship manager', label: 'Relationship Manager' },
-    { value: 'investment banker', label: 'Investment Banker' },
-    { value: 'treasury analyst', label: 'Treasury Analyst' },
-    { value: 'assistant manager', label: 'Assistant Manager' },
-    { value: 'senior manager', label: 'Senior Manager' },
-    { value: 'branch manager', label: 'Branch Manager' },
-    { value: 'assistant branch manager', label: 'Assistant Branch Manager' },
-    { value: 'general manager', label: 'General Manager' },
-    { value: 'data scientist', label: 'Data Scientist' },
-    { value: 'machine learning engineer', label: 'Machine Learning Engineer' },
-    { value: 'ai specialist', label: 'AI Specialist' },
-    { value: 'data analyst', label: 'Data Analyst' },
-    { value: 'data engineer', label: 'Data Engineer' },
-    { value: 'nlp engineer', label: 'NLP Engineer' },
-    { value: 'deep learning engineer', label: 'Deep Learning Engineer' },
-    { value: 'computer vision engineer', label: 'Computer Vision Engineer' },
-    { value: 'cloud architect', label: 'Cloud Architect' },
-    { value: 'cloud engineer', label: 'Cloud Engineer' },
-    { value: 'blockchain developer', label: 'Blockchain Developer' },
-    { value: 'cybersecurity analyst', label: 'Cybersecurity Analyst' },
-    { value: 'penetration tester', label: 'Penetration Tester' },
-    { value: 'iot developer', label: 'IoT Developer' },
-    { value: 'robotics engineer', label: 'Robotics Engineer' },
-    { value: 'ui ux designer', label: 'UI/UX Designer' },
-    { value: 'product manager', label: 'Product Manager' },
-    { value: 'business analyst', label: 'Business Analyst' },
-    { value: 'system administrator', label: 'System Administrator' },
-    { value: 'network engineer', label: 'Network Engineer' },
-    { value: 'game developer', label: 'Game Developer' },
-    { value: 'site reliability engineer', label: 'Site Reliability Engineer' },
-    { value: 'it consultant', label: 'IT Consultant' },
-    { value: 'database administrator', label: 'Database Administrator' },
-    { value: 'qa engineer', label: 'QA Engineer' },
-    { value: 'software tester', label: 'Software Tester' },
-    { value: 'technical writer', label: 'Technical Writer' },
-    { value: 'solution architect', label: 'Solution Architect' },
-    { value: 'bi developer', label: 'BI Developer' },
-    { value: 'cloud security engineer', label: 'Cloud Security Engineer' },
-    { value: 'quantitative analyst', label: 'Quantitative Analyst' },
-    { value: 'ai research scientist', label: 'AI Research Scientist' },
-    { value: 'bioinformatics specialist', label: 'Bioinformatics Specialist' },
     { value: 'carpenter', label: 'Carpenter' },
     { value: 'delivery driver', label: 'Delivery Driver' },
     { value: 'plumber', label: 'Plumber' },
@@ -963,7 +893,7 @@ const JobPostingForm = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-xl">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Post a New Job</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit the Job</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -1283,6 +1213,23 @@ const JobPostingForm = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="visibility"
+              name="visibility"
+              checked={formData.visibility}
+              onChange={handleInputChange}
+              disabled={loading}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="negotiation" className="ml-2 block text-sm text-gray-900">
+              <AiFillEyeInvisible className="inline mr-2" />Visibility
+            </label>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="jobApplyingMode">
               <FaUserPlus className="inline mr-2" />Job Applying Mode *
@@ -1363,14 +1310,14 @@ const JobPostingForm = () => {
           <Link href="/joblists/All/All"
             className="px-6 py-2 bg-black text-white font-semibold rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
           >
-            Settings
+            Go Back To Job Lists
           </Link>
           <button
             disabled={loading ? true : false}
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ml-10"
           >
-            {`${loading ? "Posting Job ..." : "Post Job"}`}
+            {`${loading ? "Udating Job ..." : "Update Job"}`}
           </button>
         </div>
 
@@ -1379,4 +1326,4 @@ const JobPostingForm = () => {
   );
 };
 
-export default JobPostingForm;
+export default EditJob;
