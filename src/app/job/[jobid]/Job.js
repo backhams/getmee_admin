@@ -17,7 +17,6 @@ import { ClipLoader } from 'react-spinners';
 
 const Job = ({ params, job }) => {
   const router = useRouter();
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   let formattedDate = '';
   const { setJob } = useJobStore();

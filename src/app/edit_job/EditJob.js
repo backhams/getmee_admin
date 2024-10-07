@@ -8,38 +8,65 @@ import useJobStore from '@/app/store/jobStore';
 import { useRouter } from "next/navigation";
 const EditJob = () => {
     const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const { job } = useJobStore();
-
-  if (!job) {
-    return <p>No job to edit</p>;
-  }
-  const api = process.env.API_ENDPOINT
-  const [formData, setFormData] = useState({
-    title: job.title,
-    poster: job.poster,
-    posterNumber: job.posterNumber,
-    posterEmail: job.posterEmail,
-    modeOfMessage: job.modeOfMessage,
-    location: job.location,
-    locality: job.locality,
-    category: job.category,
-    payRate: job.payRate,
-    payType: job.payType,
-    image: job.image,
-    type: job.type,
-    description: job.description,
-    experience: job.experience,
-    qualification: job.qualification,
-    shortDescription: job.shortDescription,
-    appliersCount: job.appliersCount,
-    negotiation: job.negotiation,
-    visibility: job.visibility,
-    jobApplyingMode: job.jobApplyingMode,
-    formSubmissionPath: job.formSubmissionPath,
-    offerBy: job.offerBy,
-    posterDuration: job.posterDuration
-  });
+    const { job } = useJobStore();
+    
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+      title: "",
+      poster: "",
+      posterNumber: "",
+      posterEmail: "",
+      modeOfMessage: "",
+      location: "",
+      locality: "",
+      category: "",
+      payRate: "",
+      payType: "",
+      image: "",
+      type: "",
+      description: "",
+      experience: "",
+      qualification: "",
+      shortDescription: "",
+      appliersCount: 0,
+      negotiation: false,
+      visibility: "",
+      jobApplyingMode: "",
+      formSubmissionPath: "",
+      offerBy: "",
+      posterDuration: 1
+    });
+  
+    // Update formData when job is available
+    React.useEffect(() => {
+      if (job) {
+        setFormData({
+          title: job.title,
+          poster: job.poster,
+          posterNumber: job.posterNumber,
+          posterEmail: job.posterEmail,
+          modeOfMessage: job.modeOfMessage,
+          location: job.location,
+          locality: job.locality,
+          category: job.category,
+          payRate: job.payRate,
+          payType: job.payType,
+          image: job.image,
+          type: job.type,
+          description: job.description,
+          experience: job.experience,
+          qualification: job.qualification,
+          shortDescription: job.shortDescription,
+          appliersCount: job.appliersCount,
+          negotiation: job.negotiation,
+          visibility: job.visibility,
+          jobApplyingMode: job.jobApplyingMode,
+          formSubmissionPath: job.formSubmissionPath,
+          offerBy: job.offerBy,
+          posterDuration: job.posterDuration
+        });
+      }
+    }, [job]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
