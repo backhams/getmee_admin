@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 const EditJob = () => {
     const router = useRouter();
     const { job } = useJobStore();
+    const api = process.env.API_ENDPOINT;
     
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
