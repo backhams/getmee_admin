@@ -1,11 +1,14 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, FaClock, FaFileAlt, FaUser, FaPhone, FaEnvelope, FaComments, FaLocationArrow, FaList, FaImage, FaBriefcase, FaGraduationCap, FaUserTie, FaUsers, FaHandshake, FaUserPlus, FaCalendarAlt } from "react-icons/fa";
 import Select from 'react-select';
 import Link from 'next/link';
+import { quotes, getRandomQuote } from "../app/components/quotes"
+import { ReactTyped } from "react-typed";  // Use correct import for ReactTyped
 
 const JobPostingForm = () => {
   const [loading, setLoading] = useState(false);
+   const [currentQuote, setCurrentQuote] = useState('');
   const api = process.env.API_ENDPOINT
   const [formData, setFormData] = useState({
     title: "",
@@ -961,9 +964,26 @@ const JobPostingForm = () => {
     { value: 'freelance risk management consultant', label: 'Freelance Risk Management Consultant' }
   ];
 
+   // Set a random quote when the component mounts
+ useEffect(() => {
+  const quote = getRandomQuote();
+  setCurrentQuote(quote || "Keep hustling!"); // Fallback to a default message if something goes wrong
+}, []);
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-xl">
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Post a New Job</h2>
+      <p style={{ fontSize: '20px', margin: '29px 0', textAlign:"center" }}>
+      {currentQuote && (
+        <ReactTyped
+          strings={[currentQuote]}  // Pass the current quote as an array
+          typeSpeed={17}
+          backSpeed={30}
+          loop={false}
+          showCursor={false}
+        />
+      )}
+      </p>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

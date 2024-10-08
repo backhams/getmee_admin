@@ -11,6 +11,8 @@ import { IoSettingsSharp } from "react-icons/io5";
 import paginateJobList from '@/app/components/Action';
 import { useInView } from "react-intersection-observer";
 import { Bars, ThreeDots } from "react-loader-spinner";
+import { quotes, getRandomQuote } from "@/app/components/quotes"
+import { ReactTyped } from "react-typed";  // Use correct import for ReactTyped
 
 const JobSearchApp = ({ data, joblist }) => {
   const router = useRouter();
@@ -28,6 +30,8 @@ const JobSearchApp = ({ data, joblist }) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [paginateError, setPaginateError] = useState("");
   const [ref, inView] = useInView();
+  const [currentQuote, setCurrentQuote] = useState('');
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +81,11 @@ const JobSearchApp = ({ data, joblist }) => {
     }, 200); // Delay by 200ms to debounce
   }
 
-
+ // Set a random quote when the component mounts
+ useEffect(() => {
+  const quote = getRandomQuote();
+  setCurrentQuote(quote || "Keep hustling!"); // Fallback to a default message if something goes wrong
+}, []);
 
   const override = {
     display: "block",
@@ -1055,6 +1063,17 @@ const JobSearchApp = ({ data, joblist }) => {
         {/* <FaBell className="text-gray-600" /> */}
       </div>
 
+      <p style={{ fontSize: '17px', margin: '20px 0', textAlign:"center" }}>
+      {currentQuote && (
+        <ReactTyped
+          strings={[currentQuote]}  // Pass the current quote as an array
+          typeSpeed={17}
+          backSpeed={30}
+          loop={false}
+          showCursor={false}
+        />
+      )}
+      </p>
       {/* Search Bar */}
       <div className="bg-white p-4 space-y-3">
         {/* Job Category Dropdown */}
