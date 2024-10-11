@@ -160,11 +160,15 @@ const Job = ({ params, job }) => {
       <div className="px-4 py-4">
         <div className="bg-white rounded-lg shadow-md p-4 flex justify-between">
           <div className="flex items-center">
+          {(job.payRate || job.payRateInWord) && (
             <h1 className="text-green-600 mr-2">₹</h1>
-            {job.payRate ? (
-               <span className="font-semibold">{job.payRate}/{job.payType}</span>
-            ) : (
-              <span className="font-semibold">{job.payRateInWord}/{job.payType}</span>
+          )}
+            {(job.payRate || job.payRateInWord) && (
+              job.payRate ? (
+                <span className="font-semibold">{job.payRate}/{job.payType}</span>
+              ) : (
+                <span className="font-semibold">{job.payRateInWord}/{job.payType}</span>
+              )
             )}
           </div>
           <div className="flex items-center">

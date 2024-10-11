@@ -1171,12 +1171,16 @@ const JobSearchApp = ({ data, joblist }) => {
                       </span>
                     </div>
                     <div className="ml-2">
-                      {job.payRate ? (
+                    {(job.payRate || job.payRateInWord) && (
+                      job.payRate ? (
                         <span className="text-green-500 font-bold">₹{job.payRate.toFixed(0)}</span>
                       ) : (
                         <span className="text-green-500 font-bold">₹{job.payRateInWord}</span>
-                      )}
+                      )
+                    )}
+                     {(job.payRate || job.payRateInWord) && (
                       <span className="text-xs text-gray-500"> / {job.payType}</span>
+                     )}
                     </div>
                   </div>
                 </div>

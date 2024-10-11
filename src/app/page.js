@@ -1138,7 +1138,7 @@ const JobPostingForm = () => {
               type="number"
               id="payRate"
               name="payRate"
-              required={!formData.payRateInWord ? true : false}
+              // required={!formData.payRateInWord ? true : false}
               value={formData.payRate}
               onChange={handleInputChange}
               disabled={loading}
