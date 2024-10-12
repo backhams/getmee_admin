@@ -51,6 +51,7 @@ const EditJob = () => {
           locality: job.locality,
           category: job.category,
           payRate: job.payRate,
+          payRateInWord: job.payRateInWord,
           payType: job.payType,
           image: job.image,
           type: job.type,
